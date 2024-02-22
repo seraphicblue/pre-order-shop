@@ -1,5 +1,6 @@
 package com.example.payment;
 
+import com.example.payment.dto.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -32,7 +33,7 @@ public class Payment {
     private BigDecimal paymentAmount;
 
     @Column(name = "payment_status", nullable = false)
-    private String paymentStatus;
+    private PaymentStatus paymentStatus;
 
     @Column(name = "product_id", nullable = false)
     private String productId;
@@ -45,7 +46,7 @@ public class Payment {
 
     @Builder
     public Payment(Long paymentId, LocalDateTime paymentTime, BigDecimal paymentAmount,
-                   String paymentStatus, String productId, String productType, String payerId) {
+                   PaymentStatus paymentStatus, String productId, String productType, String payerId) {
         this.paymentAmount = paymentAmount;
         this.paymentStatus = paymentStatus;
         this.productId = productId;
@@ -55,7 +56,7 @@ public class Payment {
 
 
     // 상태 업데이트 메소드
-    public void updatePaymentStatus(String newStatus) {
+    public void updatePaymentStatus(PaymentStatus newStatus) {
         this.paymentStatus = newStatus;
     }
 
