@@ -1,1 +1,4 @@
 rootProject.name = 'preordershop'
+include 'payment-module'
+include 'product-module'
+

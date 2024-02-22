@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://mysql:3306/pre_shop_database?serverTimezone=UTC
+    username: local_user
+    password: local_password
+
+  redis:
+    host: redis
+    port: 6379
+
+server:
+  port: 8088
+
+logging:
+  level:
+    root: DEBUG
+    com.example.payment: DEBUG
+

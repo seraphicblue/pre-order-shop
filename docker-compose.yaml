@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: pre_shop_service
+    volumes:
+      - ./db/mysql/data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: pre_shop_database
+      MYSQL_USER: local_user
+      MYSQL_PASSWORD: local_password
+    networks:
+      - preshop
+
+  redis:
+    image: redis:latest
+    container_name: pre_redis_service
+    ports:
+      - "6380:6379"
+    networks:
+      - preshop
+
+networks:
+  preshop:
