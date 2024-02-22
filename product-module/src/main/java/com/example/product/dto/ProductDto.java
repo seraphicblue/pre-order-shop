@@ -11,6 +11,7 @@ public class ProductDto {
     private Integer stock;
     private BigDecimal price;
     private LocalDateTime executionTime;
+    private boolean isPurchasable;
 
     public ProductDto(Long id, String productName, Integer stock, BigDecimal price, LocalDateTime executionTime) {
         this.id = id;
@@ -18,5 +19,14 @@ public class ProductDto {
         this.stock = stock;
         this.price = price;
         this.executionTime = executionTime;
+        this.isPurchasable = false; // 기본값은 false로 설정
+    }
+
+    public void updatePurchasable(LocalDateTime now) {
+        if (this.executionTime != null) {
+            this.isPurchasable = this.executionTime.isBefore(now);
+        } else {
+            this.isPurchasable = true; // executionTime이 null인 경우, 항상 구매 가능하다고 가정
+        }
     }
 }

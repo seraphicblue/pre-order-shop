@@ -7,6 +7,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -55,15 +56,27 @@ public class ProductService {
 
     // 전체 상품 가져오기
     public List<ProductDto> getAllProducts() {
-        List<ProductDto> preProducts = preProductRepository.findAll().stream()
-                .map(p -> new ProductDto(p.getPreId(), p.getPreProductName(), p.getPreStock(), p.getPrePrice(), p.getPreExecutionTime()))
-                .toList();
+        List<ProductDto> products = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
 
-        List<ProductDto> normalProducts = normalProductRepository.findAll().stream()
-                .map(n -> new ProductDto(n.getNormalId(), n.getNormalProductName(), n.getNormalStock(), n.getNormalPrice(), null))
-                .toList();
+        preProductRepository.findAll().forEach(preProduct -> {
 
-        return Stream.concat(preProducts.stream(), normalProducts.stream())
-                .collect(Collectors.toList());
+            ProductDto dto = new ProductDto(preProduct.getPreId(), preProduct.getPreProductName(),
+                    preProduct.getPreStock(), preProduct.getPrePrice(), preProduct.getPreExecutionTime());
+
+            dto.updatePurchasable(now); // 구매 가능 여부 업데이트
+            products.add(dto);
+        });
+
+        normalProductRepository.findAll().forEach(normalProduct -> {
+
+            ProductDto dto = new ProductDto(normalProduct.getNormalId(), normalProduct.getNormalProductName(),
+                    normalProduct.getNormalStock(), normalProduct.getNormalPrice(), null);
+
+            dto.updatePurchasable(now); // 일반 상품은 항상 구매 가능
+            products.add(dto);
+        });
+
+        return products;
     }
 }
