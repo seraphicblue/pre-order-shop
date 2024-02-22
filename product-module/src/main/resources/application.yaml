@@ -1,18 +1,18 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://mysql:3306/pre_shop_database?serverTimezone=UTC
+    url: jdbc:mysql://localhost:3307/order_purchase_database?serverTimezone=UTC
     username: local_user
     password: local_password
 
   redis:
-    host: redis
+    host: localhost
     port: 6379
 
 server:
   port: 8087
 
-logging:
+llogging:
   level:
     root: DEBUG
     com.example.product: DEBUG
