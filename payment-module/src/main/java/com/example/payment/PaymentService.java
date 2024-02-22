@@ -21,19 +21,13 @@ public class PaymentService {
 
     // 결제 시작
     public Payment initiatePayment(OrderDto orderDto) {
-
-        DeductRequest initRequest = DeductRequest.builder()
-                .productId(orderDto.getProductId())
-                .paymentStatus(INITIATED)
-                .build();
-
-        // Redis에서 재고 차감 요청
-        productServiceClient.deductInitStockFromRedis(initRequest);
+        handleStockAdjustment(orderDto.getProductId(), BigDecimal.valueOf(1), INITIATED);
 
         Payment payment = Payment.builder()
                 .productId(orderDto.getProductId())
                 .payerId(orderDto.getPayerId())
-                .paymentAmount(BigDecimal.valueOf(1))// 작성자가 수량을 정하기 전이므로 1로 설정
+                .paymentAmount(BigDecimal.valueOf(1)) // 작성자가 수량을 정하기 전이므로 1로 설정
+                .productType(orderDto.getProductType())
                 .paymentStatus(INITIATED)
                 .paymentTime(LocalDateTime.now())
                 .build();
@@ -44,36 +38,23 @@ public class PaymentService {
 
     // 결제 화면 진입 중 취소
     public Payment initiateCancel(Long paymentId) {
-
         Payment payment = getPayment(paymentId, "결제화면에 접속한 적이 없습니다:");
 
-        // Redis에서 재고 추가 요청 1개
-        DeductRequest initRequest = DeductRequest.builder()
-                .productId(payment.getProductId())
-                .paymentStatus(INITIATED_CANCELLED)
-                .build();
-
-        productServiceClient.plusInitStockFromRedis(initRequest);
+        handleStockAdjustment(payment.getProductId(), null, INITIATED_CANCELLED);
 
         updatePaymentStatusAndTime(payment, INITIATED_CANCELLED);
 
         paymentRepository.save(payment);
-
         return payment;
     }
+
     // 결제 진행
     public Payment proceedPayment(Long paymentId) {
         Payment payment = getPayment(paymentId, "결제내역이 없습니다.: ");
 
-        DeductRequest proceedRequest = DeductRequest.builder()
-                .productId(payment.getProductId())
-                .paymentAmount(payment.getPaymentAmount())
-                .paymentStatus(IN_PROGRESS)
-                .build();
+        handleStockAdjustment(payment.getProductId(), payment.getPaymentAmount(), IN_PROGRESS);// 수량 문제 처리 이슈
 
-        productServiceClient.deductProceedStockFromRedis(proceedRequest);
-
-        updatePaymentStatusAndTime(payment,IN_PROGRESS);
+        updatePaymentStatusAndTime(payment, IN_PROGRESS);
 
         paymentRepository.save(payment);
         return payment;
@@ -83,13 +64,7 @@ public class PaymentService {
     public Payment proceedCancel(Long paymentId) {
         Payment payment = getPayment(paymentId, "결제 내역이 없습니다.: ");
 
-        // Redis에서 재고 추가 요청 (결제 진행 단계에서의 재고 추가)
-        DeductRequest proceedRequest =DeductRequest.builder()
-                .productId(payment.getProductId())
-                .paymentAmount(payment.getPaymentAmount())
-                .build();
-
-        productServiceClient.plusProceedStockFromRedis(proceedRequest);
+        handleStockAdjustment(payment.getProductId(), payment.getPaymentAmount(), IN_PROGRESS_CANCELLED);
 
         updatePaymentStatusAndTime(payment, IN_PROGRESS_CANCELLED);
 
@@ -102,38 +77,27 @@ public class PaymentService {
     public void completePayment(Long paymentId) {
         Payment payment = getPayment(paymentId, "결제내역이 없습니다.: ");
 
-        DeductRequest completeRequest = DeductRequest.builder()
-                .productId(payment.getProductId())
-                .paymentAmount(payment.getPaymentAmount())
-                .paymentStatus(COMPLETED)
-                .build();
-
-        productServiceClient.deductCompleteStockFromRedis(completeRequest);
-
-        updatePaymentStatusAndTime(payment,COMPLETED);
+        updatePaymentStatusAndTime(payment, COMPLETED);
 
         paymentRepository.save(payment);
+
+        //product에 stock을 감소시킬 메소드 추가
     }
 
     // 결제 완료 후 취소
     public Payment cancelCompletedPayment(Long paymentId) {
         Payment payment = getPayment(paymentId, "결제내역이 없습니다.: ");
 
-        // 재고 추가 요청 로직
-        DeductRequest cancelRequest = DeductRequest.builder()
-                .productId(payment.getProductId())
-                .paymentAmount(payment.getPaymentAmount())
-                .paymentStatus(CANCELLED)
-                .build();
-
-        productServiceClient.plusCompleteStockFromRedis(cancelRequest);
+        handleStockAdjustment(payment.getProductId(), payment.getPaymentAmount(), CANCELLED);
 
         updatePaymentStatusAndTime(payment, CANCELLED);
 
         paymentRepository.save(payment);
 
+        //product에 stock을 증가 시킬 메소드 추가
         return payment;
     }
+
 
     //결제 상태와 시간 변경
     private void updatePaymentStatusAndTime(Payment payment, PaymentStatus status) {
@@ -145,6 +109,30 @@ public class PaymentService {
     private Payment getPayment(Long paymentId, String errorMessagePrefix) {
         return paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new EntityNotFoundException(errorMessagePrefix + paymentId));
+    }
+    public void handleStockAdjustment(String productId, BigDecimal paymentAmount, PaymentStatus paymentStatus) {
+        // DeductRequest 객체 생성
+        DeductRequest request = DeductRequest.builder()
+                .productId(productId)
+                .paymentAmount(paymentAmount)
+                .paymentStatus(paymentStatus)
+                .build();
+
+        switch (paymentStatus) {
+            case INITIATED:
+            case IN_PROGRESS:
+                // 진행 중 또는 시작 시 재고 차감 요청
+                productServiceClient.deductStockFromRedis(request);
+                break;
+            case INITIATED_CANCELLED:
+            case IN_PROGRESS_CANCELLED:
+            case CANCELLED:
+                // 취소 시 재고 추가 요청
+                productServiceClient.plusStockFromRedis(request);
+                break;
+            default:
+                throw new IllegalArgumentException("결제 상태가 파악되지 않습니다 : " + paymentStatus);
+        }
     }
 
 }
