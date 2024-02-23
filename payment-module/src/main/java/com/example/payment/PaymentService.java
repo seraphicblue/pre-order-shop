@@ -40,7 +40,7 @@ public class PaymentService {
     public Payment initiateCancel(Long paymentId) {
         Payment payment = getPayment(paymentId, "결제화면에 접속한 적이 없습니다:");
 
-        handleStockAdjustment(payment.getProductId(), null, INITIATED_CANCELLED);
+        handleStockAdjustment(payment.getProductId(),payment.getPaymentAmount(), INITIATED_CANCELLED);
 
         updatePaymentStatusAndTime(payment, INITIATED_CANCELLED);
 
@@ -77,26 +77,40 @@ public class PaymentService {
     public void completePayment(Long paymentId) {
         Payment payment = getPayment(paymentId, "결제내역이 없습니다.: ");
 
-        updatePaymentStatusAndTime(payment, COMPLETED);
+        updatePaymentStatusAndTime(payment, PaymentStatus.COMPLETED);
+
+        //  MySQL에서 재고 차감
+        DeductRequest deductRequest = DeductRequest.builder()
+                .productId(payment.getProductId())
+                .paymentAmount(payment.getPaymentAmount())
+                .build();
+
+
+        productServiceClient.deductProductFromMysql(deductRequest);
 
         paymentRepository.save(payment);
-
-        //product에 stock을 감소시킬 메소드 추가
     }
 
     // 결제 완료 후 취소
     public Payment cancelCompletedPayment(Long paymentId) {
         Payment payment = getPayment(paymentId, "결제내역이 없습니다.: ");
 
-        handleStockAdjustment(payment.getProductId(), payment.getPaymentAmount(), CANCELLED);
+        updatePaymentStatusAndTime(payment, PaymentStatus.CANCELLED);
 
-        updatePaymentStatusAndTime(payment, CANCELLED);
+        //  MySQL에서 재고 추가
+        DeductRequest request = DeductRequest.builder()
+                .productId(payment.getProductId())
+                .paymentAmount(payment.getPaymentAmount())
+                .build();
+
+
+        productServiceClient.plusProductFromMysql(request);
 
         paymentRepository.save(payment);
 
-        //product에 stock을 증가 시킬 메소드 추가
         return payment;
     }
+
 
 
     //결제 상태와 시간 변경

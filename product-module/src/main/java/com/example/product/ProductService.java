@@ -1,9 +1,9 @@
 package com.example.product;
 
-import com.example.product.domain.NormalProduct;
-import com.example.product.domain.PreProduct;
+import com.example.product.domain.config.Product;
 import com.example.product.dto.ProductDto;
 import com.example.product.dto.StockStatusDto;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -13,15 +13,14 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
 public class ProductService {
 
     private final RedisTemplate<String, String> redisTemplate;
-    private final PreProductRepository preProductRepository;
-    private final NormalProductRepository normalProductRepository;
+    private final ProductRepository productRepository;
+
 
     // 재고 차감
     public void deductStockFromRedis(String productId, BigDecimal paymentAmount) {
@@ -61,28 +60,21 @@ public class ProductService {
         List<ProductDto> products = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
 
-        preProductRepository.findAll().forEach(preProduct -> {
-
-            ProductDto dto = new ProductDto(preProduct.getPreId(), preProduct.getPreProductName(),
-                    preProduct.getPreStock(), preProduct.getPrePrice(), preProduct.getPreExecutionTime());
-
+        productRepository.findAll().forEach(product -> {
+            ProductDto dto = new ProductDto(
+                    product.getProductId(),
+                    product.getProductName(),
+                    product.getStock(),
+                    product.getPrice(),
+                    product.getExecutionTime());
             dto.updatePurchasable(now); // 구매 가능 여부 업데이트
-            products.add(dto);
-        });
-
-        normalProductRepository.findAll().forEach(normalProduct -> {
-
-            ProductDto dto = new ProductDto(normalProduct.getNormalId(), normalProduct.getNormalProductName(),
-                    normalProduct.getNormalStock(), normalProduct.getNormalPrice(), null);
-
-            dto.updatePurchasable(now); // 일반 상품은 항상 구매 가능
             products.add(dto);
         });
 
         return products;
     }
 
-    //현재 재고가 있는지 체크후 dto 빌드
+    // 현재 재고 체크 후 DTO 빌드
     public StockStatusDto checkStock(Long productId) {
         BigDecimal currentStock = getCurrentStock(productId.toString());
         return StockStatusDto.builder()
@@ -102,38 +94,43 @@ public class ProductService {
         return new BigDecimal(currentStockString);
     }
 
-    //상품 조회 하기
+    // 상품 상세 조회
     public ProductDto getProductDetail(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 상품이 존재 하지 않습니다.: " + productId));
+
         LocalDateTime now = LocalDateTime.now();
-        // 예약 상품 리포지토리에서 먼저 조회 시도
-        Optional<PreProduct> preProductOpt = preProductRepository.findById(productId);
-        if (preProductOpt.isPresent()) {
-            PreProduct preProduct = preProductOpt.get();
-            ProductDto dto = new ProductDto(
-                    preProduct.getPreId(),
-                    preProduct.getPreProductName(),
-                    preProduct.getPreStock(),
-                    preProduct.getPrePrice(),
-                    preProduct.getPreExecutionTime());
-            dto.updatePurchasable(now);
-            return dto;
-        }
+        ProductDto dto = new ProductDto(
+                product.getProductId(),
+                product.getProductName(),
+                product.getStock(),
+                product.getPrice(),
+                product.getExecutionTime());
+        dto.updatePurchasable(now);
 
-        // 일반 상품 리포지토리에서 조회 시도
-        Optional<NormalProduct> normalProductOpt = normalProductRepository.findById(productId);
-        if (normalProductOpt.isPresent()) {
-            NormalProduct normalProduct = normalProductOpt.get();
-            ProductDto dto = new ProductDto(
-                    normalProduct.getNormalId(),
-                    normalProduct.getNormalProductName(),
-                    normalProduct.getNormalStock(),
-                    normalProduct.getNormalPrice(),
-                    null); // 일반 상품은 executionTime 없음
-            dto.updatePurchasable(now); // 일반 상품은 항상 구매 가능
-            return dto;
-        }
-
-        throw new RuntimeException("상품을 찾을 수 없습니다. ID: " + productId);
+        return dto;
     }
+
+    // MySQL에서 재고 차감
+    public void deductStockFromMysql(Long productId, BigDecimal amount) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("상품을 찾을 수 없습니다.: " + productId));
+        BigDecimal newStock = product.getStock().subtract(amount);
+        if (newStock.compareTo(BigDecimal.ZERO) < 0) {
+            throw new RuntimeException("재고가 부족합니다.");
+        }
+        product.updateStock(newStock);
+        productRepository.save(product);
+    }
+
+    // MySQL에서 재고 증가
+    public void plusStockToMysql(Long productId, BigDecimal amount) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("상품을 찾을 수 없습니다.: " + productId));
+        BigDecimal newStock = product.getStock().add(amount);
+        product.updateStock(newStock);
+        productRepository.save(product);
+    }
+
 
 }

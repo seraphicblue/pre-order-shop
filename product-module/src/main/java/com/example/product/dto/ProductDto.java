@@ -8,12 +8,12 @@ import java.time.LocalDateTime;
 public class ProductDto {
     private Long id;
     private String productName;
-    private Integer stock;
+    private BigDecimal stock;
     private BigDecimal price;
     private LocalDateTime executionTime;
     private boolean isPurchasable;
 
-    public ProductDto(Long id, String productName, Integer stock, BigDecimal price, LocalDateTime executionTime) {
+    public ProductDto(Long id, String productName, BigDecimal stock, BigDecimal price, LocalDateTime executionTime) {
         this.id = id;
         this.productName = productName;
         this.stock = stock;
