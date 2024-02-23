@@ -49,10 +49,13 @@ public class PaymentService {
     }
 
     // 결제 진행
-    public Payment proceedPayment(Long paymentId) {
+    public Payment proceedPayment(Long paymentId,BigDecimal finalQuantity) {
         Payment payment = getPayment(paymentId, "결제내역이 없습니다.: ");
 
-        handleStockAdjustment(payment.getProductId(), payment.getPaymentAmount(), IN_PROGRESS);// 수량 문제 처리 이슈
+        handleStockAdjustment(payment.getProductId(),finalQuantity, IN_PROGRESS);// 수량 문제 처리 이슈
+
+        // Payment 객체에 최종 수량 반영
+        payment.updatePaymentAmount(finalQuantity);
 
         updatePaymentStatusAndTime(payment, IN_PROGRESS);
 
@@ -103,8 +106,9 @@ public class PaymentService {
                 .paymentAmount(payment.getPaymentAmount())
                 .build();
 
-
         productServiceClient.plusProductFromMysql(request);
+
+        handleStockAdjustment(payment.getProductId(), payment.getPaymentAmount(), PaymentStatus.CANCELLED);
 
         paymentRepository.save(payment);
 

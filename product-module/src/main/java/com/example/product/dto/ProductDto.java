@@ -1,32 +1,32 @@
 package com.example.product.dto;
 
-import lombok.Getter;
+import com.example.product.domain.config.ProductType;
+import lombok.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
+@NoArgsConstructor(access = AccessLevel.PUBLIC)
+@AllArgsConstructor(access = AccessLevel.PUBLIC)
 @Getter
+@Builder
 public class ProductDto {
-    private Long id;
+    private Long productId;
     private String productName;
     private BigDecimal stock;
     private BigDecimal price;
     private LocalDateTime executionTime;
-    private boolean isPurchasable;
+    private ProductType productType;
+    private boolean isPurchasable; // 구매 가능 여부를 나타내는 필드
 
-    public ProductDto(Long id, String productName, BigDecimal stock, BigDecimal price, LocalDateTime executionTime) {
-        this.id = id;
-        this.productName = productName;
-        this.stock = stock;
-        this.price = price;
-        this.executionTime = executionTime;
-        this.isPurchasable = false; // 기본값은 false로 설정
-    }
-
+    // 구매 가능 여부 업데이트 메소드
     public void updatePurchasable(LocalDateTime now) {
-        if (this.executionTime != null) {
-            this.isPurchasable = this.executionTime.isBefore(now);
+        // executionTime이 null이 아니고 현재 시간(now) 이후인 경우에만 구매 불가능으로 설정
+        if (this.executionTime != null && this.executionTime.isAfter(now)) {
+            this.isPurchasable = false;
         } else {
-            this.isPurchasable = true; // executionTime이 null인 경우, 항상 구매 가능하다고 가정
+            // 그 외의 경우에는 구매 가능으로 설정
+            this.isPurchasable = true;
         }
     }
+
 }

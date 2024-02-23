@@ -3,6 +3,7 @@ package com.example.product;
 import com.example.product.domain.config.Product;
 import com.example.product.dto.ProductDto;
 import com.example.product.dto.StockStatusDto;
+import com.example.product.mapper.ProductMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -21,6 +22,22 @@ public class ProductService {
     private final RedisTemplate<String, String> redisTemplate;
     private final ProductRepository productRepository;
 
+    // 상품등록
+    public ProductDto registerProduct(ProductDto productDto) {
+        // ProductDto를 Product 엔티티로 변환
+        Product product = ProductMapper.fromDto(productDto);
+
+        product = productRepository.save(product);
+
+        registerProductStockInRedis(product.getProductId(), product.getStock());
+        // 저장된 제품을 ProductDto로 변환하여 반환
+        return ProductMapper.toDto(product);
+    }
+
+    //초기 재고 redis에 등록
+    private void registerProductStockInRedis(Long productId, BigDecimal stock) {
+        redisTemplate.opsForValue().set("product:" + productId, stock.toString());
+    }
 
     // 재고 차감
     public void deductStockFromRedis(String productId, BigDecimal paymentAmount) {
@@ -55,24 +72,31 @@ public class ProductService {
         ops.set(stockKey, newStock.toString());
     }
 
-    // 전체 상품 가져오기
+    // 전체 상품 요청
     public List<ProductDto> getAllProducts() {
         List<ProductDto> products = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
 
         productRepository.findAll().forEach(product -> {
-            ProductDto dto = new ProductDto(
-                    product.getProductId(),
-                    product.getProductName(),
-                    product.getStock(),
-                    product.getPrice(),
-                    product.getExecutionTime());
-            dto.updatePurchasable(now); // 구매 가능 여부 업데이트
+            // ProductDto 객체 생성을 위해 Builder 패턴 사용
+            ProductDto dto = ProductDto.builder()
+                    .productId(product.getProductId())
+                    .productName(product.getProductName())
+                    .stock(product.getStock())
+                    .price(product.getPrice())
+                    .executionTime(product.getExecutionTime())
+                    .productType(product.getProductType())
+                    .build();
+
+            // 구매 가능 여부 업데이트
+            dto.updatePurchasable(now);
+
             products.add(dto);
         });
 
         return products;
     }
+
 
     // 현재 재고 체크 후 DTO 빌드
     public StockStatusDto checkStock(Long productId) {
@@ -97,16 +121,11 @@ public class ProductService {
     // 상품 상세 조회
     public ProductDto getProductDetail(Long productId) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new EntityNotFoundException("해당 상품이 존재 하지 않습니다.: " + productId));
+                .orElseThrow(() -> new EntityNotFoundException("해당 상품이 존재하지 않습니다.: " + productId));
 
         LocalDateTime now = LocalDateTime.now();
-        ProductDto dto = new ProductDto(
-                product.getProductId(),
-                product.getProductName(),
-                product.getStock(),
-                product.getPrice(),
-                product.getExecutionTime());
-        dto.updatePurchasable(now);
+
+        ProductDto dto = ProductMapper.toDto(product);
 
         return dto;
     }

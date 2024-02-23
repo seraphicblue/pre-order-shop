@@ -1,6 +1,7 @@
 package com.example.payment;
 
 import com.example.payment.dto.OrderDto;
+import com.example.payment.dto.PaymentQuantityDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,10 +22,12 @@ public class PaymentController {
 
     //결제 요청
     @PatchMapping("/progress/{paymentId}")
-    public ResponseEntity<?> paymentProgress(@PathVariable("paymentId") Long paymentId) {
-        paymentService.proceedPayment(paymentId);
+    public ResponseEntity<?> paymentProgress(@PathVariable("paymentId") Long paymentId,
+                                             @RequestBody PaymentQuantityDto quantityDto) {
+        paymentService.proceedPayment(paymentId, quantityDto.getQuantity());
         return ResponseEntity.ok().build();
     }
+
 
     //결제 완료
     @PatchMapping("/complete/{paymentId}")

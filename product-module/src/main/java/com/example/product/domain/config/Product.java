@@ -1,16 +1,18 @@
 package com.example.product.domain.config;
 
+import com.example.product.dto.ProductDto;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // 기본 생성자 추가
+@AllArgsConstructor // 전체 생성자 추가
 @Getter
 @Entity
+@Builder
 @Table(name = "products")
 public class Product {
 
@@ -39,4 +41,17 @@ public class Product {
     public void updateStock(BigDecimal newStock) {
         this.stock = newStock;
     }
+
+    // Product 엔티티를 ProductDto로 변환
+    public static ProductDto toDto(Product product) {
+        return ProductDto.builder()
+                .productId(product.getProductId())
+                .productName(product.getProductName())
+                .stock(product.getStock())
+                .price(product.getPrice())
+                .executionTime(product.getExecutionTime())
+                .productType(product.getProductType())
+                .build();
+    }
 }
+

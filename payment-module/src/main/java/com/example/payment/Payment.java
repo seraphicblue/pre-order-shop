@@ -65,4 +65,9 @@ public class Payment {
     public void updatePaymentTime(LocalDateTime newPaymentTime) {
         this.paymentTime = newPaymentTime;
     }
+
+    //결제 재고 수량 입력 메소드
+    public void updatePaymentAmount(BigDecimal finalQuantity) {
+        this.paymentAmount = finalQuantity;
+    }
 }

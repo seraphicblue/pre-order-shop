@@ -3,11 +3,9 @@ package com.example.product;
 import com.example.product.dto.ProductDto;
 import com.example.product.dto.StockStatusDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -15,7 +13,15 @@ import java.util.List;
 @RestController
 @RequestMapping("/product")
 public class ProductController {
+
     private final ProductService productService;
+
+    //상품 등록
+    @PostMapping("/register")
+    public ResponseEntity<ProductDto> registerProduct(@RequestBody ProductDto productDto) {
+        ProductDto savedProduct = productService.registerProduct(productDto);
+        return new ResponseEntity<>(savedProduct, HttpStatus.CREATED);
+    }
 
     // 전체 상품 가져오기
     @GetMapping("/list")
