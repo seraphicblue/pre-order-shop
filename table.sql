@@ -7,3 +7,11 @@ CREATE TABLE payment (
                          product_type VARCHAR(255) NOT NULL,
                          payer_id VARCHAR(255) NOT NULL
 );
+CREATE TABLE products (
+                          product_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                          product_name VARCHAR(255),
+                          stock DECIMAL(10, 2),
+                          price DECIMAL(10, 2),
+                          execution_time DATETIME,
+                          product_type VARCHAR(50)
+);
