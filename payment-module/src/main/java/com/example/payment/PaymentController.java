@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/payment")
@@ -27,7 +29,6 @@ public class PaymentController {
         paymentService.proceedPayment(paymentId, quantityDto.getQuantity());
         return ResponseEntity.ok().build();
     }
-
 
     //결제 완료
     @PatchMapping("/complete/{paymentId}")
@@ -56,5 +57,13 @@ public class PaymentController {
         paymentService.cancelCompletedPayment(paymentId);
         return ResponseEntity.ok().build();
     }
+
+    //주문 정보 조회
+    @GetMapping("/payments")
+    public ResponseEntity<List<Payment>> getPaymentsByPayerId(@RequestParam String payerId) {
+        List<Payment> payments = paymentService.getPaymentsByPayerId(payerId);
+        return ResponseEntity.ok(payments);
+    }
+
 
 }

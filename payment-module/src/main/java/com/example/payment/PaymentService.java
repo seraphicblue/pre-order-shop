@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static com.example.payment.dto.PaymentStatus.*;
 
@@ -153,4 +154,7 @@ public class PaymentService {
         }
     }
 
+    public List<Payment> getPaymentsByPayerId(String  payerId) {
+        return paymentRepository.findByPayerId(payerId);
+    }
 }
