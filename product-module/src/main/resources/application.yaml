@@ -12,7 +12,7 @@ spring:
 server:
   port: 8087
 
-llogging:
+logging:
   level:
     root: DEBUG
     com.example.product: DEBUG

@@ -1,4 +1,5 @@
 rootProject.name = 'preordershop'
 include 'payment-module'
 include 'product-module'
+include 'api-gateway'
 
