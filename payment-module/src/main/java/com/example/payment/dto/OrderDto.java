@@ -5,7 +5,7 @@ import lombok.Getter;
 import java.math.BigDecimal;
 @Getter
 public class OrderDto {
-    private String productId; // 상품명
+    private Long productId; // 상품명
     private String payerId; // 주문자
     private BigDecimal amount; //수량
     private String productType;

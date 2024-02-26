@@ -37,7 +37,7 @@ public class Payment {
     private PaymentStatus paymentStatus;
 
     @Column(name = "product_id", nullable = false)
-    private String productId;
+    private Long productId;
 
     @Column(name = "product_type", nullable = false)
     private String productType;
@@ -47,7 +47,7 @@ public class Payment {
 
     @Builder
     public Payment(Long paymentId, LocalDateTime paymentTime, BigDecimal paymentAmount,
-                   PaymentStatus paymentStatus, String productId, String productType, String payerId) {
+                   PaymentStatus paymentStatus, Long productId, String productType, String payerId) {
         this.paymentAmount = paymentAmount;
         this.paymentStatus = paymentStatus;
         this.productId = productId;

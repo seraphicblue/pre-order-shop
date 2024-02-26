@@ -129,7 +129,7 @@ public class PaymentService {
     }
 
     //재고 조정 요청
-    private StockAdjustmentRequest createStockAdjustmentRequest(String productId, BigDecimal amount, PaymentStatus status) {
+    private StockAdjustmentRequest createStockAdjustmentRequest(Long productId, BigDecimal amount, PaymentStatus status) {
         return StockAdjustmentRequest.builder()
                 .productId(productId)
                 .paymentAmount(amount)
