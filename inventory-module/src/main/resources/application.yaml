@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3307/order_purchase_database?serverTimezone=UTC
+    username: local_user
+    password: local_password
+
+  redis:
+    host: localhost
+    port: 6379
+
+server:
+  port: 8089
+
+logging:
+  level:
+    root: DEBUG
+    com.example.inventory: DEBUG
