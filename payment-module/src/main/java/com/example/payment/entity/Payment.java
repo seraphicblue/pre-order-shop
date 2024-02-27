@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
+@Builder(toBuilder = true)
 @Table(name = "payment")
 @EntityListeners(AuditingEntityListener.class)
 public class Payment {
@@ -56,18 +57,15 @@ public class Payment {
     }
 
 
-    // 상태 업데이트 메소드
-    public void updatePaymentStatus(PaymentStatus newStatus) {
-        this.paymentStatus = newStatus;
+    public Payment updatePaymentStatus(PaymentStatus newStatus) {
+        return this.toBuilder()
+                .paymentStatus(newStatus)
+                .build();
     }
 
-    // 결제 시간 업데이트 메소드
-    public void updatePaymentTime(LocalDateTime newPaymentTime) {
-        this.paymentTime = newPaymentTime;
-    }
-
-    //결제 재고 수량 입력 메소드
-    public void updatePaymentAmount(BigDecimal finalQuantity) {
-        this.paymentAmount = finalQuantity;
+    public Payment updatePaymentAmount(BigDecimal finalQuantity) {
+        return this.toBuilder()
+                .paymentAmount(finalQuantity)
+                .build();
     }
 }
