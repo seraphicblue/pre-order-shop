@@ -17,7 +17,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         logErrorDetails(ex);
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
-    @ExceptionHandler(PaymentNotFoundException.class)
+    @ExceptionHandler(InvalidFinalQuantityException.class)
     public ResponseEntity<String> handleInvalidFinalQuantityException(InvalidFinalQuantityException ex) {
         logErrorDetails(ex);
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
