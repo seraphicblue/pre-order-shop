@@ -23,6 +23,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         logErrorDetails(ex);
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(InsufficientStockException.class)
+    public ResponseEntity<String> handleInsufficientStockException(InsufficientStockException ex) {
+        logErrorDetails(ex);
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
 
 
     private void logErrorDetails(Exception ex) {
