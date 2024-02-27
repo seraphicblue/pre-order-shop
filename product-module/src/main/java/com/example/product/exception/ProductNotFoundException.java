@@ -1,11 +1,12 @@
-package com.example.inventory.exception;
+package com.example.product.exception;
 
 import org.springframework.http.HttpStatus;
 
-public class InventoryNotFoundException extends RuntimeException {
+public class ProductNotFoundException  extends RuntimeException {
     private final ErrorCode errorCode;
 
-    public InventoryNotFoundException(ErrorCode errorCode, Long productId) {
+    public ProductNotFoundException (ErrorCode errorCode, String productId) {
+
         super(errorCode.getMessage() + productId);
         this.errorCode = errorCode;
     }

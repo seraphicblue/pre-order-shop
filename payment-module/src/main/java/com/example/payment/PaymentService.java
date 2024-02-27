@@ -2,18 +2,19 @@ package com.example.payment;
 
 import com.example.payment.dto.OrderDto;
 import com.example.payment.dto.PaymentStatus;
+import com.example.payment.exception.ErrorCode;
+import com.example.payment.exception.InvalidFinalQuantityException;
+import com.example.payment.exception.PaymentNotFoundException;
 import com.example.payment.request.StockAdjustmentRequest;
 import com.example.payment.request.UpdateStockRequest;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.example.payment.exception.ErrorCode.PAYMENT_NOT_FOUND;
 import static com.example.payment.dto.PaymentStatus.*;
 
 
@@ -23,7 +24,6 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final InventoryServiceClient inventoryServiceClient;
     private final ProductServiceClient productServiceClient;
-    private static final Logger logger = LoggerFactory.getLogger(PaymentService.class);
 
     // 결제 화면 진입 시 재고 차감 (Redis)
     public Payment initiatePayment(OrderDto orderDto) {
@@ -55,6 +55,9 @@ public class PaymentService {
     // 결제 진행
     public Payment proceedPayment(Long paymentId, BigDecimal finalQuantity) {
         Payment payment = findPaymentById(paymentId);
+        if (finalQuantity == null || finalQuantity.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new InvalidFinalQuantityException(ErrorCode.INVALID_FINAL_QUANTITY, finalQuantity);
+        }
         // 결제 진행 시 실제 수량 반영하여 Redis에서 재고 차감
         StockAdjustmentRequest deductRequest = createStockAdjustmentRequest(
                 payment.getProductId(),
@@ -183,9 +186,8 @@ public class PaymentService {
     //주문 내역 예외처리
     private Payment findPaymentById(Long paymentId) {
         return paymentRepository.findById(paymentId).orElseThrow(() -> {
-            String errorMessage = String.format("주문 내역이 없습니다.: %s", paymentId);
-            logger.error(errorMessage);
-            throw new EntityNotFoundException(errorMessage);
+            return new PaymentNotFoundException(PAYMENT_NOT_FOUND, paymentId);
         });
     }
+
 }
