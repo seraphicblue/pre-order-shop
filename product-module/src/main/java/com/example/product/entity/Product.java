@@ -37,10 +37,17 @@ public class Product {
     @Column(name = "product_type")
     private ProductType productType;
 
-
-    public void updateStock(BigDecimal newStock) {
-        this.stock = newStock;
+    public static Product createUpdatedProduct(Product product, BigDecimal newStock) {
+        return Product.builder()
+                .productId(product.getProductId())
+                .productName(product.getProductName())
+                .stock(newStock)
+                .price(product.getPrice())
+                .executionTime(product.getExecutionTime())
+                .productType(product.getProductType())
+                .build();
     }
+
 
     // Product 엔티티를 ProductDto로 변환
     public static ProductDto toDto(Product product) {

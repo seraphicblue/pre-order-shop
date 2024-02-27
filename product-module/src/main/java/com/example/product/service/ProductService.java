@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.example.product.entity.Product.createUpdatedProduct;
 import static com.example.product.service.exception.ErrorCode.INVALID_STOCK_OPERATION;
 import static com.example.product.service.exception.ErrorCode.PRODUCT_NOT_FOUND;
 
@@ -22,10 +23,8 @@ import static com.example.product.service.exception.ErrorCode.PRODUCT_NOT_FOUND;
 @Service
 public class ProductService {
 
-    private final RedisTemplate<String, String> redisTemplate;
     private final ProductRepository productRepository;
-
-    private final InventoryClient inventoryClient; // Feign Client 추가
+    private final InventoryClient inventoryClient;
 
     // 상품 등록
     public ProductDto registerProduct(ProductDto productDto) {
@@ -64,31 +63,33 @@ public class ProductService {
 
     public void deductProduct(Long productId, BigDecimal amount) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ProductNotFoundException(PRODUCT_NOT_FOUND ,": " + productId));
+                .orElseThrow(() -> new ProductNotFoundException(PRODUCT_NOT_FOUND, ": " + productId));
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-
             throw new InvalidStockOperationException(INVALID_STOCK_OPERATION, ": " + amount);
         }
         BigDecimal newStock = product.getStock().subtract(amount);
         if (newStock.compareTo(BigDecimal.ZERO) < 0) {
             throw new RuntimeException("재고가 충분하지 않습니다.: " + productId);
         }
-        product.updateStock(newStock);
-        productRepository.save(product);
-    }
 
+        Product updatedProduct = createUpdatedProduct(product, newStock);
+        productRepository.save(updatedProduct);
+    }
 
     public void plusProduct(Long productId, BigDecimal amount) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ProductNotFoundException(PRODUCT_NOT_FOUND ,": " + productId));
+                .orElseThrow(() -> new ProductNotFoundException(PRODUCT_NOT_FOUND, ": " + productId));
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-
             throw new InvalidStockOperationException(INVALID_STOCK_OPERATION, ": " + amount);
         }
         BigDecimal newStock = product.getStock().add(amount);
-        product.updateStock(newStock);
-        productRepository.save(product);
+
+        Product updatedProduct = createUpdatedProduct(product, newStock);
+        productRepository.save(updatedProduct);
     }
+
+
+
 }
 
 
