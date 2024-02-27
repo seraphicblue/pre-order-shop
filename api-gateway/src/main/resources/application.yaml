@@ -9,14 +9,19 @@ spring:
           predicates:
             - Path=/payment/**
           filters:
-            - RewritePath=/payment/(?<segment>.*), /$\{segment}
+            - RewritePath=/payment/(?<segment>.*), /${segment}
         - id: product-module
           uri: http://localhost:8087
           predicates:
             - Path=/product/**
           filters:
-            - RewritePath=/product/(?<segment>.*), /$\{segment}
-
+            - RewritePath=/product/(?<segment>.*), /${segment}
+        - id: inventory-module
+          uri: http://localhost:8089
+          predicates:
+            - Path=/inventory/**
+          filters:
+            - RewritePath=/inventory/(?<segment>.*), /${segment}
 
 server:
   port: 8086
@@ -26,3 +31,4 @@ logging:
     root: DEBUG
     com.example.payment: DEBUG
     com.example.product: DEBUG
+    com.example.inventory: DEBUG # inventory 모듈에 대한 로깅 레벨 설정 추가
