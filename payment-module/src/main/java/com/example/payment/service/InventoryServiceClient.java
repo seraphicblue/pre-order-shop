@@ -7,9 +7,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(name = "inventory-module", url = "http://localhost:8089")
 public interface InventoryServiceClient {
+    //실시간 재고 차감
     @PostMapping("/internal/inventory/deduct")
     void deductStock(@RequestBody StockAdjustmentRequest request);
-
+    //실시간 재고 추가
     @PostMapping("/internal/inventory/plus")
     void plusStock(@RequestBody StockAdjustmentRequest request);
 }
