@@ -1,9 +1,9 @@
 package com.example.inventory.controller;
 
-import com.example.inventory.Inventory;
-import com.example.inventory.InventoryService;
-import com.example.inventory.request.InventoryCreateRequest;
-import com.example.inventory.request.StockAdjustmentRequest;
+import com.example.inventory.entity.Inventory;
+import com.example.inventory.service.InventoryService;
+import com.example.inventory.controller.request.InventoryCreateRequest;
+import com.example.inventory.controller.request.StockAdjustmentRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
