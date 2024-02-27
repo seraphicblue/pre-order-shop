@@ -1,4 +1,4 @@
-package com.example.product.domain.config;
+package com.example.inventory;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;

@@ -4,6 +4,7 @@ import com.example.product.domain.config.Product;
 import com.example.product.dto.ProductDto;
 import com.example.product.dto.StockStatusDto;
 import com.example.product.mapper.ProductMapper;
+import com.example.product.request.InventoryCreateRequest;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -27,11 +28,21 @@ public class ProductService {
 
     // 상품 등록
     public ProductDto registerProduct(ProductDto productDto) {
+        // DTO에서 Entity로 변환
         Product product = ProductMapper.fromDto(productDto);
+        // 상품 정보 저장
         product = productRepository.save(product);
 
+        // InventoryCreateRequest 객체 생성
+        InventoryCreateRequest request = InventoryCreateRequest.builder()
+                .productId(product.getProductId())
+                .stockQuantity(product.getStock())
+                .build();
+
         // 재고 등록 요청을 InventoryService로 전송
-        inventoryClient.updateStock(product.getProductId(), product.getStock());
+        inventoryClient.updateStock(request);
+
+        // Entity를 DTO로 변환하여 반환
         return ProductMapper.toDto(product);
     }
 
@@ -50,5 +61,25 @@ public class ProductService {
         return ProductMapper.toDto(product);
     }
 
+    public void deductProduct(Long productId, BigDecimal amount) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("상품이 존재하지 않습니다: " + productId));
+        BigDecimal newStock = product.getStock().subtract(amount);
+        if (newStock.compareTo(BigDecimal.ZERO) < 0) {
+            throw new RuntimeException("재고가 충분하지 않습니다.: " + productId);
+        }
+        product.updateStock(newStock);
+        productRepository.save(product);
+    }
 
+
+    public void plusProduct(Long productId, BigDecimal amount) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("상품이 존재하지 않습니다: " + productId));
+        BigDecimal newStock = product.getStock().add(amount);
+        product.updateStock(newStock);
+        productRepository.save(product);
+    }
 }
+
+

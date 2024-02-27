@@ -15,16 +15,12 @@ CREATE TABLE products (
                           execution_time DATETIME,
                           product_type VARCHAR(50)
 );
-CREATE TABLE products (
-                          product_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                          product_name VARCHAR(255) NOT NULL,
-                          price DECIMAL(10, 2) NOT NULL,
-                          execution_time DATETIME, -- 예약 구매로 구매 버튼이 활성화 되는 시간
-                          product_type VARCHAR(50)
-);
-CREATE TABLE inventory (
-                           inventory_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                           product_id BIGINT NOT NULL, -- 외래키 제약 조건 없이 상품 ID를 저장
-                           stock_quantity DECIMAL(10, 2) NOT NULL, -- 현재 재고 수량
-                           last_update DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+
+CREATE TABLE `inventory` (
+                             `inventory_id` BIGINT NOT NULL AUTO_INCREMENT,
+                             `product_id` BIGINT NOT NULL,
+                             `stock_quantity` DECIMAL(10,2) NOT NULL,
+                             `last_update` DATETIME NOT NULL,
+                             PRIMARY KEY (`inventory_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+

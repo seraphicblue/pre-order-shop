@@ -11,20 +11,22 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 public class InventoryController {
+
     private final InventoryService inventoryService;
 
-    //재고 등록
-    @PostMapping("/create")
+    //product 상품 등록시 -> 재고 등록
+    @PostMapping("interner/inventory/update")
     public ResponseEntity<?> createInventory(@RequestBody InventoryCreateRequest request) {
         Inventory inventory = inventoryService.createInventory(request.getProductId(), request.getStockQuantity());
         return ResponseEntity.ok(inventory);
     }
-    //재고 차감
+    //payment 결제 화면 진입, 결제 중 -> 재고 차감
     @PostMapping("/internal/inventory/deduct")
     public void deductStock(@RequestBody StockAdjustmentRequest request) {
         inventoryService.updateStock(request.getProductId(), request.getPaymentAmount().negate());
     }
-    //재고 증가
+
+    //payment 결제 화면 이탈, 결제 중 취소 -> 재고 증가
     @PostMapping("/internal/inventory/plus")
     public void plusStock(@RequestBody StockAdjustmentRequest request) {
         inventoryService.updateStock(request.getProductId(), request.getPaymentAmount().negate());

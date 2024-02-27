@@ -3,6 +3,7 @@ package com.example.payment;
 import com.example.payment.dto.OrderDto;
 import com.example.payment.dto.PaymentStatus;
 import com.example.payment.request.StockAdjustmentRequest;
+import com.example.payment.request.UpdateStockRequest;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -21,6 +22,7 @@ import static com.example.payment.dto.PaymentStatus.*;
 public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final InventoryServiceClient inventoryServiceClient;
+    private final ProductServiceClient productServiceClient;
     private static final Logger logger = LoggerFactory.getLogger(PaymentService.class);
 
     // 결제 화면 진입 시 재고 차감 (Redis)
@@ -38,7 +40,7 @@ public class PaymentService {
     }
 
     // 결제 화면 이탈 시 재고 복구 (Redis) - 결제 시작 후 취소
-    public void cancelPayment(Long paymentId) {
+    public void initiateCancel(Long paymentId) {
         Payment payment = findPaymentById(paymentId);
 
         // 재고 복구 로직에 따라 다르게 처리
@@ -56,7 +58,7 @@ public class PaymentService {
         // 결제 진행 시 실제 수량 반영하여 Redis에서 재고 차감
         StockAdjustmentRequest deductRequest = createStockAdjustmentRequest(
                 payment.getProductId(),
-                finalQuantity,
+                finalQuantity.subtract(BigDecimal.ONE),
                 IN_PROGRESS
         );
         inventoryServiceClient.deductStock(deductRequest);
@@ -85,14 +87,23 @@ public class PaymentService {
     // 결제 완료 시 재고 차감 (MySQL)
     public void completePayment(Long paymentId) {
         Payment payment = findPaymentById(paymentId);
+
         StockAdjustmentRequest deductRequest = createStockAdjustmentRequest(
                 payment.getProductId(),
                 payment.getPaymentAmount(), // 실제 결제 시 결정된 수량
-                PaymentStatus.COMPLETED
+                COMPLETED
         );
-        inventoryServiceClient.deductStock(deductRequest);
 
         updatePaymentStatusAndTime(payment, COMPLETED);
+
+        UpdateStockRequest deductrequest = UpdateStockRequest.builder()
+                .productId(payment.getProductId())
+                .paymentAmount(payment.getPaymentAmount())
+                .build();
+
+        productServiceClient.deductProduct(deductrequest);
+
+
         paymentRepository.save(payment);
     }
 
@@ -106,6 +117,11 @@ public class PaymentService {
         );
         inventoryServiceClient.plusStock(request);
 
+        UpdateStockRequest plusrequest = UpdateStockRequest.builder()
+                .productId(payment.getProductId())
+                .paymentAmount(payment.getPaymentAmount())
+                .build();
+        productServiceClient.plusProduct(plusrequest);
         updatePaymentStatusAndTime(payment, CANCELLED);
         paymentRepository.save(payment);
     }
@@ -160,6 +176,7 @@ public class PaymentService {
 
     //주문 정보조회
     public List<Payment> getPaymentsByPayerId(String payerId) {
+
         return paymentRepository.findByPayerId(payerId);
     }
 

@@ -16,3 +16,4 @@ logging:
   level:
     root: DEBUG
     com.example.inventory: DEBUG
+

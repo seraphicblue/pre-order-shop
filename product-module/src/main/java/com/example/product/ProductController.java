@@ -30,13 +30,13 @@ public class ProductController {
         return ResponseEntity.ok(productList);
     }
 
-    // 상품 재고 확인하기
+  /*  // 상품 재고 확인하기
     @GetMapping("/{productId}/stock")
     public ResponseEntity<StockStatusDto> getCurrentStock(@PathVariable Long productId) {
         StockStatusDto stockStatus = productService.checkStock(productId);
         return ResponseEntity.ok(stockStatus);
     }
-
+*/
     // 상품 상세 조회
     @GetMapping("/{productId}")
     public ResponseEntity<ProductDto> getProductDetail(@PathVariable Long productId) {

@@ -1,3 +1,4 @@
+
 package com.example.payment.request;
 
 
@@ -9,15 +10,12 @@ import java.math.BigDecimal;
 
 @Builder
 @Getter
-public class DeductRequest {
+public class UpdateStockRequest {
 
-    private String productId;
+    private Long productId;
     private BigDecimal paymentAmount;
-    private PaymentStatus paymentStatus;
 
 
-    public void updatePaymentStatus(PaymentStatus paymentStatus) {
 
-        this.paymentStatus = paymentStatus;
-    }
+
 }
