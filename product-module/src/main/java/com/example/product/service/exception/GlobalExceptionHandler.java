@@ -17,7 +17,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         logErrorDetails(ex);
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
-
     @ExceptionHandler(InvalidStockOperationException.class)
     public ResponseEntity<String> handleInvalidFinalQuantityException(InvalidStockOperationException ex) {
         logErrorDetails(ex);

@@ -28,9 +28,13 @@ public class Inventory {
     @Column(name = "last_update", nullable = false)
     private LocalDateTime lastUpdate;
 
-    // 재고 수량 업데이트 메서드
-    public void updateStockQuantity(BigDecimal newStockQuantity) {
-        this.stockQuantity = newStockQuantity;
-        this.lastUpdate = LocalDateTime.now(); // 재고 업데이트 시간을 현재로 설정
+    // 재고 수량 업데이트
+    public Inventory updatedStockQuantity(BigDecimal newStockQuantity) {
+        return Inventory.builder()
+                .inventoryId(this.inventoryId)
+                .productId(this.productId)
+                .stockQuantity(newStockQuantity)
+                .lastUpdate(LocalDateTime.now()) // 현재 시간으로 lastUpdate 설정
+                .build();
     }
 }

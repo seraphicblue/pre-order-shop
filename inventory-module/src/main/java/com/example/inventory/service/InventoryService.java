@@ -16,43 +16,50 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class InventoryService {
+
     private final InventoryRepository inventoryRepository;
     private final RedisTemplate<String, String> redisTemplate;
 
     //재고 등록
     public Inventory createInventory(Long productId, BigDecimal stockQuantity) {
+
         Inventory inventory = Inventory.builder()
                 .productId(productId)
                 .stockQuantity(stockQuantity)
                 .lastUpdate(LocalDateTime.now())
                 .build();
+
         inventoryRepository.save(inventory);
 
-        registerProductStockInRedis(productId, stockQuantity);
+        registerProductInventoryInRedis(productId, stockQuantity);
+
         return inventory;
     }
 
     // 상품의 재고를 업데이트할 때 호출
-    public void updateStock(Long productId, BigDecimal amount) {
+    public void updateInventory(Long productId, BigDecimal amount) {
         Inventory inventory = inventoryRepository.findByProductId(productId)
                 .orElseThrow(() -> new InventoryNotFoundException(
                         ErrorCode.PRODUCT_NOT_FOUND, productId));
 
         // 재고 수량 업데이트
         BigDecimal newStockQuantity = inventory.getStockQuantity().add(amount);
-        inventory.updateStockQuantity(newStockQuantity);
 
-        // MySQL 데이터베이스에 저장
+        //재고 변경
+        inventory.updatedStockQuantity(newStockQuantity);
+
+        // 변경내역 MySQL 데이터베이스에 저장
         inventoryRepository.save(inventory);
 
         // Redis에도 재고 업데이트
-        updateStockInRedis(productId, newStockQuantity);
+        updateInventoryInRedis(productId, newStockQuantity);
     }
 
     // 현재 재고를 Redis에서 확인
-    private BigDecimal getCurrentStock(Long productId) {
+    public BigDecimal getCurrentInventory(Long productId) {
         ValueOperations<String, String> ops = redisTemplate.opsForValue();
         String currentStockString = ops.get(buildRedisKey(productId));
+
         if (currentStockString == null) {
             throw new CacheMissStockInfoException(ErrorCode.CACHE_MISS_STOCK_INFO, productId);
         }
@@ -60,13 +67,13 @@ public class InventoryService {
     }
 
     // Redis에 재고 업데이트
-    private void updateStockInRedis(Long productId, BigDecimal newStock) {
+    private void updateInventoryInRedis(Long productId, BigDecimal newStock) {
         ValueOperations<String, String> ops = redisTemplate.opsForValue();
         ops.set(buildRedisKey(productId), newStock.toString());
     }
 
     // Redis에 초기 재고 등록
-    private void registerProductStockInRedis(Long productId, BigDecimal stock) {
+    private void registerProductInventoryInRedis(Long productId, BigDecimal stock) {
         redisTemplate.opsForValue().set(buildRedisKey(productId), stock.toString());
     }
 

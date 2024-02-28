@@ -6,22 +6,26 @@ import com.example.product.controller.request.UpdateStockRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/interner/products")
 public class InternalProductController {
 
     private final ProductService productService;
 
-    @PostMapping("/internal/products/deduct")
-    public void deductProduct(@RequestBody UpdateStockRequest deductrequest) {
-        productService.deductProduct(deductrequest.getProductId(), deductrequest.getPaymentAmount());
+    //payment 최종 결제시 -> 재고 차감
+    @PostMapping("/deduct")
+    public void deductProduct(@RequestBody UpdateStockRequest request) {
+        productService.deductProduct(request.getProductId(), request.getPaymentAmount());
     }
 
-    @PostMapping("/internal/products/plus")
-    public void plusProduct(@RequestBody UpdateStockRequest plusrequest) {
-        productService.plusProduct(plusrequest.getProductId(), plusrequest.getPaymentAmount());
+    //payment 최종 결제 취소시 -> 재고 증가
+    @PostMapping("/plus")
+    public void plusProduct(@RequestBody UpdateStockRequest request) {
+        productService.plusProduct(request.getProductId(), request.getPaymentAmount());
     }
 }
 

@@ -57,9 +57,10 @@ public class Payment {
     }
 
 
-    public Payment updatePaymentStatus(PaymentStatus newStatus) {
+    public Payment updatePaymentStatus(PaymentStatus newStatus, LocalDateTime paymentTime) {
         return this.toBuilder()
                 .paymentStatus(newStatus)
+                .paymentTime(LocalDateTime.now())
                 .build();
     }
 

@@ -16,7 +16,7 @@ public class ScheduledTasks {
     @Autowired
     private ProductRepository productRepository;
 
-    // 매일 오후 2시에 실행되는 메서드
+    // 매일 오후 2시에 해당 상품 pre -> normal 로 변경
     @Scheduled(cron = "0 0 14 * * ?")
     public void activateReservedProducts() {
         LocalDateTime now = LocalDateTime.now();

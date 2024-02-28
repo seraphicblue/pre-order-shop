@@ -14,6 +14,7 @@ public class InvalidFinalQuantityException extends RuntimeException {
     }
 
     public HttpStatus getHttpStatus() {
+
         return errorCode.getHttpStatus();
     }
 }

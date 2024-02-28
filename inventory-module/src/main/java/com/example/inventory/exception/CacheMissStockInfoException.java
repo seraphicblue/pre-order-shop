@@ -12,6 +12,7 @@ public class CacheMissStockInfoException extends RuntimeException {
     }
 
     public HttpStatus getHttpStatus() {
+
         return errorCode.getHttpStatus();
     }
 }

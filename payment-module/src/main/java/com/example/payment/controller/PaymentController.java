@@ -36,19 +36,20 @@ public class PaymentController {
         paymentService.completePayment(paymentId);
         return ResponseEntity.ok().build();
     }
+
     // 결제 시작 단계 취소
     @DeleteMapping("/cancel/init/{paymentId}")
     public ResponseEntity<?> initiateCancel(@PathVariable("paymentId") Long paymentId) {
         paymentService.initiateCancel(paymentId);
         return ResponseEntity.ok().build();
     }
+
     // 결제 진행 중 취소
     @DeleteMapping("/cancel/progress/{paymentId}")
     public ResponseEntity<?> proceedCancel(@PathVariable("paymentId") Long paymentId) {
         paymentService.proceedCancel(paymentId);
         return ResponseEntity.ok().build();
     }
-
 
     // 결제 완료 후 취소
     @DeleteMapping("/cancel/complete/{paymentId}")

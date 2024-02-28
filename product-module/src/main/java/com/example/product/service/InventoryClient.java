@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(name = "inventory-module", url = "http://localhost:8089")
 public interface InventoryClient {
+    //실시간 재고 증가
     @PostMapping("interner/inventory/update")
     void updateStock(@RequestBody InventoryCreateRequest request);
 }

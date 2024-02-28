@@ -6,17 +6,24 @@ import lombok.Getter;
 
 import java.math.BigDecimal;
 
-@Builder
 @Getter
-public class StockAdjustmentRequest {
+@Builder
+public class InventoryAdjustmentRequest {
 
     private Long productId;
     private BigDecimal paymentAmount;
     private PaymentStatus paymentStatus;
 
-
     public void updatePaymentStatus(PaymentStatus paymentStatus) {
-
         this.paymentStatus = paymentStatus;
+    }
+
+
+    public static InventoryAdjustmentRequest createInventoryAdjustmentRequest(Long productId, BigDecimal amount, PaymentStatus status) {
+        return InventoryAdjustmentRequest.builder()
+                .productId(productId)
+                .paymentAmount(amount)
+                .paymentStatus(status)
+                .build();
     }
 }

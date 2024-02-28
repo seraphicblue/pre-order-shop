@@ -11,6 +11,7 @@ public class PaymentNotFoundException extends RuntimeException {
         this.errorCode = errorCode;
     }
     public HttpStatus getHttpStatus() {
+
         return errorCode.getHttpStatus();
     }
 
