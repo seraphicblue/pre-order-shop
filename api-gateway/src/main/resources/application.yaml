@@ -31,4 +31,4 @@ logging:
     root: DEBUG
     com.example.payment: DEBUG
     com.example.product: DEBUG
-    com.example.inventory: DEBUG # inventory 모듈에 대한 로깅 레벨 설정 추가
+    com.example.inventory: DEBUG
