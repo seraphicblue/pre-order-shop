@@ -10,7 +10,18 @@
 - **결제 상태 추적**: 제품 예약 및 구매 과정에서 발생하는 모든 결제 상태(결제 진행 중, 결제 완료, 결제 취소)를 실시간으로 추적하고 관리합니다. 
 
 ### 자동 상품 상태 업데이트 스케줄러
-- 매일 오후 2시에 자동으로 실행되는 스케줄러를 통해 해당 날짜에 맞는 상품 상태를 변경합니다. 
+- 매일 오후 2시에 자동으로 실행되는 스케줄러를 통해 해당 날짜에 맞는 상품 상태를 변경합니다.
+## 기술 스택
+
+- Java
+- Spring Boot
+- JPA
+- MySQL
+- Docker
+- Redis
+- Spring Scheduler
+- Spring Cloud Gateway
+- Feign Client
   
 ## API 명세서
 - [https://documenter.getpostman.com/view/32712175/2sA2xb5aHH](https://documenter.getpostman.com/view/32712175/2sA2xb5aHH)
