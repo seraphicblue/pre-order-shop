@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/payment")
 @RequiredArgsConstructor
 public class PaymentController {
     private final PaymentService paymentService;
@@ -38,21 +37,21 @@ public class PaymentController {
     }
 
     // 결제 시작 단계 취소
-    @DeleteMapping("/cancel/init/{paymentId}")
+    @PatchMapping("/cancel/init/{paymentId}")
     public ResponseEntity<?> initiateCancel(@PathVariable("paymentId") Long paymentId) {
         paymentService.initiateCancel(paymentId);
         return ResponseEntity.ok().build();
     }
 
     // 결제 진행 중 취소
-    @DeleteMapping("/cancel/progress/{paymentId}")
+    @PatchMapping("/cancel/progress/{paymentId}")
     public ResponseEntity<?> proceedCancel(@PathVariable("paymentId") Long paymentId) {
         paymentService.proceedCancel(paymentId);
         return ResponseEntity.ok().build();
     }
 
     // 결제 완료 후 취소
-    @DeleteMapping("/cancel/complete/{paymentId}")
+    @PatchMapping("/cancel/complete/{paymentId}")
     public ResponseEntity<Void> cancelCompletedPayment(@PathVariable Long paymentId) {
         paymentService.cancelCompletedPayment(paymentId);
         return ResponseEntity.ok().build();

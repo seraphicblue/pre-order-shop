@@ -42,6 +42,8 @@ public class ProductService {
                 .productId(product.getProductId())
                 .stockQuantity(product.getStock())
                 .build();
+        System.out.println(product.getProductId());
+        System.out.println(product.getStock());
 
         // 재고 등록 요청을 InventoryService로 전송
         inventoryClient.updateStock(request);

@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(name = "product-module", url = "http://localhost:8087")
 public interface ProductServiceClient {
 
-    @PostMapping("/internal/products/deduct")
+    @PostMapping("/interner/products/deduct")
     void deductProduct(@RequestBody UpdateStockRequest deductrequest);
 
-    @PostMapping("/internal/products/plus")
+    @PostMapping("/interner/products/plus")
     void plusProduct(@RequestBody UpdateStockRequest plusrequest);
 
 

@@ -12,7 +12,6 @@ import java.math.BigDecimal;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/inventory")
 public class InventoryController {
 
     private final InventoryService inventoryService;
