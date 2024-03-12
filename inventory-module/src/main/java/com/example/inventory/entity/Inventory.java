@@ -28,6 +28,14 @@ public class Inventory {
     @Column(name = "last_update", nullable = false)
     private LocalDateTime lastUpdate;
 
+    public Inventory(Long productId, BigDecimal stockQuantity) {
+        this.productId = productId;
+        this.stockQuantity = stockQuantity;
+        this.lastUpdate = LocalDateTime.now();
+
+    }
+
+
     // 재고 수량 업데이트
     public Inventory updatedStockQuantity(BigDecimal newStockQuantity) {
         return Inventory.builder()
