@@ -37,12 +37,8 @@ public class Inventory {
 
 
     // 재고 수량 업데이트
-    public Inventory updatedStockQuantity(BigDecimal newStockQuantity) {
-        return Inventory.builder()
-                .inventoryId(this.inventoryId)
-                .productId(this.productId)
-                .stockQuantity(newStockQuantity)
-                .lastUpdate(LocalDateTime.now()) // 현재 시간으로 lastUpdate 설정
-                .build();
+    public void updatedStockQuantity(BigDecimal newStockQuantity) {
+        this.stockQuantity = newStockQuantity;
+        this.lastUpdate = LocalDateTime.now();
     }
 }

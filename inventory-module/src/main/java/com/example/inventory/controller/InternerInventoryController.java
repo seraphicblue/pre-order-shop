@@ -30,6 +30,6 @@ public class InternerInventoryController {
     //payment 결제 화면 이탈, 결제 중 취소 -> 재고 증가
     @PostMapping("/plus")
     public void plusInventory(@RequestBody InventoryAdjustmentRequest request) {
-        inventoryService.updateInventory(request.getProductId(), request.getPaymentAmount().negate());
+        inventoryService.updateInventory(request.getProductId(), request.getPaymentAmount());
     }
 }
